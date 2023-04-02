@@ -46,14 +46,16 @@ def mine_blocks(number):
     """
     Mine for a some number of blocks with random generated transactions.
     :return: HTML
+    Here we can get the payload and mine it
+    {"id": <ID>, "vote_id": <number>}
     """
     transactions_range = randint(1, 10)
-
+    pm = ['bibi','benet','gantz']
     for i in range(number):
         for transaction in range(transactions_range):
             blockchain_db_manager.add_transaction(sender=(str(uuid4()).replace('-', '')[:-10]),
-                                          recipient=(str(uuid4()).replace('-', '')[:-10]),
-                                          amount=round(random.uniform(1, 10), 2))
+                                          recipient=pm[random.randint(0,2)],
+                                          amount=1)
         blockchain_db_manager.mine_for_next_block()
 
     response = {
@@ -86,6 +88,7 @@ def view_last_n_block(number):
     temp = []
     blocks = blockchain_db_manager.get_last_n_blocks(number)
     for i in range(number - 1, -1, -1):
+        
         temp.append(blocks[i])
 
     response = {
@@ -157,4 +160,4 @@ def view_top_blocks(number, state):
     return render_template('chain.html', data=response)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=5005)

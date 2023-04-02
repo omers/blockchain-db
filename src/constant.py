@@ -5,7 +5,7 @@
 	Author: Hoanh An (hoanhan@bennington.edu)
 	Date: 12/5/2017
 """
-
+mongo_host = 'mongodb://omers-dev.aidoc-nsps.com:27017'
 max_nonce = 2 ** 32
 init_reward = 50
 block_reward_rate = 1000

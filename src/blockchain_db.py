@@ -20,7 +20,7 @@ class BlockchainDB(object):
         :param port: Port
         """
         # Setup MongoClient
-        self.client = MongoClient('mongodb://127.0.0.1:27017')
+        self.client = MongoClient(mongo_host)
 
         # Connect to blockchain database
         self.db = self.client.blockchain
@@ -311,7 +311,7 @@ class BlockchainDB(object):
         Get the length of BlockChain.
         :return: Int
         """
-        return self.blocks.count()
+        return self.blocks.count_documents({})
 
     def get_last_n_blocks(self, number):
         """
