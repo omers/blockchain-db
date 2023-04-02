@@ -6,7 +6,7 @@
 	Date: 12/5/2017
 """
 from starlette_exporter import PrometheusMiddleware, handle_metrics
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse
 
 from fastapi.templating import Jinja2Templates
@@ -30,10 +30,26 @@ templates = Jinja2Templates(directory="templates")
 
 @app.get('/health')
 async def health():
+    """
+    Health Check URL.
+    The Healthchek quiries the Database to get the last block
+    """
+    try:
+        response = {
+            'chain': [blockchain_db_manager.get_last_block()],
+            'length': 1,
+            'header': 'Last Block'
+        }
+    except:
+        raise HTTPException(
+            status_code=503,
+            detail="Service Unavaliable",
+            headers={"X-Error": "There goes my error"},
+        )
     return {"status": "healthy"}
 
 @app.get('/', response_class=HTMLResponse)
-async def hello_world(request: Request):
+async def index(request: Request):
     """
     Welcome to Blockchain message
     :return: HTML
