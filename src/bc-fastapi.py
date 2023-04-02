@@ -5,21 +5,32 @@
 	Author: Hoanh An (hoanhan@bennington.edu)
 	Date: 12/5/2017
 """
+from starlette_exporter import PrometheusMiddleware, handle_metrics
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
+
 from fastapi.templating import Jinja2Templates
-from flask import Flask, jsonify, render_template
+
+
 from uuid import uuid4
 from random import randint
 import random
 
-from blockchain_db import BlockchainDB
+from blockchain_core import BlockchainDB
 
-app = Flask(__name__)
+
 app = FastAPI()
+app.add_middleware(PrometheusMiddleware,
+                   app_name='blockchain-voting',
+                   skip_paths=['/health'])
+
+app.add_route("/metrics", handle_metrics)
 blockchain_db_manager = BlockchainDB()
 templates = Jinja2Templates(directory="templates")
+
+@app.get('/health')
+async def health():
+    return {"status": "healthy"}
 
 @app.get('/', response_class=HTMLResponse)
 async def hello_world(request: Request):
@@ -46,7 +57,7 @@ async def reset(request: Request):
     return templates.TemplateResponse("landing.html", {"request": request, "data": response})
 
 @app.get('/mine/{number}', response_class=HTMLResponse)
-def mine_blocks(request: Request, number: int):
+async def mine_blocks(request: Request, number: int):
     """
     Mine for a some number of blocks with random generated transactions.
     :return: HTML
@@ -69,7 +80,7 @@ def mine_blocks(request: Request, number: int):
     return templates.TemplateResponse("landing.html", {"request": request, "data": response})
 
 @app.get('/view/chain', response_class=HTMLResponse)
-def view_blockchain(request: Request):
+async def view_blockchain(request: Request):
     """
     View the full BlockChain.
     :return: HTML
@@ -82,7 +93,7 @@ def view_blockchain(request: Request):
     return templates.TemplateResponse("chain.html", {"request": request, "data": response})
 
 @app.get('/view/last_blocks/{number}', response_class=HTMLResponse)
-def view_last_n_block(request: Request, number: int):
+async def view_last_n_block(request: Request, number: int):
     """
     View the last number of mined blocks.
     :param number: Number of blocks
@@ -103,7 +114,7 @@ def view_last_n_block(request: Request, number: int):
     return templates.TemplateResponse("chain.html", {"request": request, "data": response})
 
 @app.get('/view/last_block', response_class=HTMLResponse)
-def view_last_block(request: Request):
+async def view_last_block(request: Request):
     """
     View the last block.
     :return: HTML
@@ -116,7 +127,7 @@ def view_last_block(request: Request):
     return templates.TemplateResponse("chain.html", {"request": request, "data": response})
 
 @app.get('/view/genesis_block', response_class=HTMLResponse)
-def view_genesis_block(request: Request):
+async def view_genesis_block(request: Request):
     """
     View the genesis block.
     :return: HTML
@@ -129,7 +140,7 @@ def view_genesis_block(request: Request):
     return templates.TemplateResponse("chain.html", {"request": request, "data": response})
 
 @app.get('/view/block/{number}', response_class=HTMLResponse)
-def view_block(request: Request, number: int):
+async def view_block(request: Request, number: int):
     """
     View a specific block for a given height number.
     :param number: Block height
@@ -143,7 +154,7 @@ def view_block(request: Request, number: int):
     return templates.TemplateResponse("chain.html", {"request": request, "data": response})
 
 @app.get('/view/top/{number}/{state}}', response_class=HTMLResponse)
-def view_top_blocks(request: Request, number: int, state: str):
+async def view_top_blocks(request: Request, number: int, state: str):
     """
     View a number of top blocks for a given state.
     :param number: Number of blocks
