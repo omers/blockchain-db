@@ -5,9 +5,12 @@
 	Author: Hoanh An (hoanhan@bennington.edu)
 	Date: 12/5/2017
 """
+from pydantic import BaseModel
 from starlette_exporter import PrometheusMiddleware, handle_metrics
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+
 
 from fastapi.templating import Jinja2Templates
 
@@ -16,17 +19,20 @@ from uuid import uuid4
 from random import randint
 import random
 
-from blockchain_core import BlockchainDB
+from src.blockchain_core import BlockchainDB
 
+class Vote(BaseModel):
+    id: int
+    pm: list = ['bibi', 'benet', 'gantz']
 
-app = FastAPI()
+app = FastAPI(docs_url='/docs', redoc_url='/redoc')
 app.add_middleware(PrometheusMiddleware,
                    app_name='blockchain-voting',
                    skip_paths=['/health'])
-
+security = HTTPBasic()
 app.add_route("/metrics", handle_metrics)
 blockchain_db_manager = BlockchainDB()
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="src/templates")
 
 @app.get('/health')
 async def health():
@@ -189,3 +195,18 @@ async def view_top_blocks(request: Request, number: int, state: str):
         'header': 'Top {0} {1}'.format(number, state)
     }
     return templates.TemplateResponse("chain.html", {"request": request, "data": response})
+
+
+@app.post('/vote}')
+async def vote(item: Vote):
+    """
+    Mine for a some number of blocks with random generated transactions.
+    :return: HTML
+    Here we can get the payload and mine it
+    {"id": <ID>, "vote_id": <number>}
+    """
+
+    blockchain_db_manager.add_transaction(sender=item.id,
+                                    recipient=item.vote,
+                                    amount=1)
+    blockchain_db_manager.mine_for_next_block()

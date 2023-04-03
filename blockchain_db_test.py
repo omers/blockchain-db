@@ -6,7 +6,7 @@
 	Date: 12/5/2017
 """
 
-from src.blockchain_db import BlockchainDB
+from src.blockchain_core import BlockchainDB
 from pprint import pprint
 from uuid import uuid4
 from random import randint
