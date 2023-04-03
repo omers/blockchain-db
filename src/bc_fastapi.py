@@ -5,6 +5,9 @@
 	Author: Hoanh An (hoanhan@bennington.edu)
 	Date: 12/5/2017
 """
+from uuid import uuid4
+from random import randint
+import random
 from pydantic import BaseModel
 from starlette_exporter import PrometheusMiddleware, handle_metrics
 from fastapi import FastAPI, Request, HTTPException
@@ -13,12 +16,6 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 
 from fastapi.templating import Jinja2Templates
-
-
-from uuid import uuid4
-from random import randint
-import random
-
 from src.blockchain_core import BlockchainDB
 
 
